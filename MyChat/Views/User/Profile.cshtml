@@ -13,14 +13,43 @@
         <div class="card-body">
             <div class="row ">
                 <div class=" col col-3"><h5>@Model.Email</h5></div>
-                @if (ViewBag.CurrentUser.Id == @Model.Id) { <div class="col col-9 d-flex"><a class="my-auto btn btn-light me-auto" asp-action="Edit" asp-controller="User" asp-route-userId="@Model.Id">Edit profile</a></div> }
-                <div class="col col-4 mt-4"> BirthDay: &nbsp; <b>@DateGet(@Model.BirthDate)</b> </div>
+                @if (ViewBag.CurrentUser.Id == @Model.Id || User.IsInRole("admin")) { <div class="col col-4 d-flex ms-4"><a class="my-auto btn btn-light me-auto" asp-action="Edit" asp-controller="User" asp-route-userId="@Model.Id">Edit profile</a></div> }
+                @if ( User.IsInRole("admin") && @Model.Id != 1) { <div class="col d-flex me-2"><a class="" id="block">Block</a></div> }
+                <div class="col col-12 mt-4"> BirthDay: &nbsp; <b>@DateGet(@Model.BirthDate)</b> </div>
                 <div class="col col-12 mt-4">UserName: &nbsp;<h5>@Model.UserName</h5></div>
                 <div class="col col-12 mt-4">Phone number: &nbsp;<h5>@Model.PhoneNumber</h5></div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts
+{
+    <script>
+        function blockIdentButton(identVal){
+                    if (identVal===false){
+                        $('#block').removeClass().toggleClass('my-auto btn btn-light mx-3 text-danger ').text('Block');
+                    }
+                    else{
+                        $('#block').removeClass().toggleClass('my-auto btn btn-light mx-3 text-success ').text('Unblock');
+                    }
+                }
+        $().ready(function (){
+            blockIdentButton('@ViewBag.BlockIdent'!=='False');
+            $('#block').click(function (e){
+                e.preventDefault();
+                $.ajax({
+                    url: '@Url.Action("Block", "Admin")',
+                    type: 'POST',
+                    data: { 'userId': @Model.Id},
+                    success: function (data){
+                        blockIdentButton(data.blockIdentVar);
+                    } 
+                }); 
+            });
+        });
+    </script>
+}
 
 @functions
 {

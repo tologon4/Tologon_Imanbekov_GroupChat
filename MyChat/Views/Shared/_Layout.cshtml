@@ -28,12 +28,22 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Chat">Chat</a>
                         </li>
+                        @if (User.IsInRole("admin"))
+                        {
+                            <li class="nav-item ms-auto">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Users" >All users</a>
+                            </li>
+                            <li class="nav-item ms-auto">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="NewUser" >NewUser</a>
+                            </li>
+                        }
                         <li class="nav-item ms-auto">
                             <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Profile" asp-route-userId="@CurrentUserGet().Id" >Profile</a>
                         </li>
                         <li class="nav-item ms-auto me-1">
                             <form method="post" asp-controller="Account" asp-action="LogOut"><input type="submit" value="Log out" class="btn nav-link text-dark"/></form>
                         </li>
+                        
                     }
                     else
                     {

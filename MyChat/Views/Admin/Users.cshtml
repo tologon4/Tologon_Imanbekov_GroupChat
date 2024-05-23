@@ -1,0 +1,19 @@
+@model List<User>
+
+@{
+    ViewBag.Title = "title";
+    Layout = "_Layout";
+}
+
+<div class="row row-cols-1">
+    @foreach (var user in @Model)
+    {
+        <div class="col-7 mx-auto mt-3">
+            <div class="alert my-0 py-0" role="alert">
+                <a asp-action="Profile" asp-controller="User" asp-route-userId="@user.Id" class="btn border h-50 border-0 btn-outline-light nav-link text-start text-dark my-2">
+                    <i><img width="150" height="150" class="rounded-circle" src="@user.Avatar"/></i><b class="ms-3 fs-5">@user.Email</b> &nbsp;| <b class="ms-3 fs-5">@user.UserName</b>
+                </a>
+            </div>
+        </div>
+    }
+</div>

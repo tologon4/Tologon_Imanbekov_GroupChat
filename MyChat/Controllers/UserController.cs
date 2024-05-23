@@ -31,7 +31,6 @@ public class UserController : Controller
         return View();
     }
     
-    
     [Authorize]
     public async Task<IActionResult> Profile(int? userId)
     {
@@ -40,6 +39,7 @@ public class UserController : Controller
         if (!userId.HasValue)
             return Redirect(referrer);
         User? user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        ViewBag.BlockIdent = user.LockoutEnabled;
         return View(user);
     }
 
@@ -64,9 +64,9 @@ public class UserController : Controller
 
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> Edit(EditViewModel model, IFormFile? uploadedFile, int? userId)
+    public async Task<IActionResult> Edit(EditViewModel model, IFormFile? uploadedFile)
     {
-        User user = _db.Users.FirstOrDefault(u=> u.Id == userId);
+        User user = _db.Users.FirstOrDefault(u=> u.Id == model.Id);
         if (ModelState.IsValid)
         {
             string? path = null;
@@ -82,7 +82,7 @@ public class UserController : Controller
                 }
             }
             model.BirthDate = model.BirthDate.Value.ToUniversalTime();
-            user.Id = user.Id;
+            user.Id = model.Id != null? model.Id : user.Id;
             user.Email = model.Email != null ? model.Email : user.Email;
             user.UserName = model.UserName != null ? model.UserName : user.UserName ;
             user.PhoneNumber = model.PhoneNumber != null ? model.PhoneNumber : user.PhoneNumber;
@@ -92,7 +92,7 @@ public class UserController : Controller
             await _userManager.UpdateAsync(user);
             _db.Users.Update(user);
             await _db.SaveChangesAsync();
-            return RedirectToAction("Profile", new {userId=user.Id});
+            return RedirectToAction("Profile", new {userId = user.Id});
         }
         ModelState.AddModelError("", "Что-то пошло не так, проверьте все данные!");
         return View(model);

@@ -11,8 +11,12 @@ builder.Services.AddControllersWithViews();
 string connection = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<MyChatDb>(options => options.UseNpgsql(connection))
-    .AddIdentity<User, IdentityRole<int>>()
-    .AddEntityFrameworkStores<MyChatDb>();
+    .AddIdentity<User, IdentityRole<int>>(options =>
+    {
+        options.Lockout.AllowedForNewUsers = true;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+        options.Lockout.MaxFailedAccessAttempts = 2;
+    }).AddEntityFrameworkStores<MyChatDb>();
 var app = builder.Build();
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;

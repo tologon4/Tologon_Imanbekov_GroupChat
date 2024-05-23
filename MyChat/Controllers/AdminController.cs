@@ -1,68 +1,71 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MyChat.Models;
-using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace MyChat.Controllers;
-
-public class AccountController : Controller
+[Authorize]
+[Authorize(Roles = "admin")]
+public class AdminController : Controller
 {
-    private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
+    private IHttpContextAccessor _httpContextAccessor;
     private readonly IWebHostEnvironment _environment;
+    private readonly UserManager<User> _userManager;
+    private IEmailSender _emailSender;
+    private MyChatDb _db;
 
  
-    public AccountController(UserManager<User> userManager, SignInManager<User> signInManager,
+    public AdminController(UserManager<User> userManager, SignInManager<User> signInManager,
         IWebHostEnvironment environment, MyChatDb db, IHttpContextAccessor httpContextAccessor)
     {
+        _httpContextAccessor = httpContextAccessor;
         _signInManager = signInManager;
         _userManager = userManager;
         _environment = environment;
+        _db = db;
     }
 
+    [Authorize]
     [HttpGet]
-    public async Task<IActionResult> Login()
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> Users()
     {
-        return View();
+        return View(_db.Users.Where(u => u.Id != 1).ToList());
     }
 
+    [Authorize]
     [HttpPost]
-    public async Task<IActionResult> Login(LoginViewModel model)
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> Block(int? userId)
     {
-        if (ModelState.IsValid)
-        {
-            User? user = await _userManager.FindByEmailAsync(model.LoginValue);
-            if (user == null)
-                user = await _userManager.FindByNameAsync(model.LoginValue);
-            if (user != null)
-            {
-                SignInResult result = await _signInManager.PasswordSignInAsync(
-                    user,
-                    model.Password,
-                    model.RememberMe,
-                    true);
-                if (result.Succeeded)
-                {
-                    if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
-                        return Redirect(model.ReturnUrl);
-                    return RedirectToAction("Profile", "User", new {userId = user.Id});
-                }
-            }
-            ModelState.AddModelError("", "Неправильный логин или пароль!");
-        }
-        ModelState.AddModelError("", "Неправильная заполненная форма!");
-        return View(model);
+        if (!userId.HasValue)
+            return Json(new {blockIdent = "no such user"});
+        User? user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null)
+            return Json(new { blockIdent = "no such user"});
+        user.LockoutEnabled = !user.LockoutEnabled;
+        if (user.LockoutEnabled == false)
+            user.LockoutEnd = DateTimeOffset.MaxValue;
+        _db.Users.Update(user);
+        await _db.SaveChangesAsync();
+        return Json(new {blockIdentVar = user.LockoutEnabled});
     }
     
+    [Authorize]
     [HttpGet]
-    public async Task<IActionResult> Register()
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> NewUser()
     {
         return View();
     }
     
+    [Authorize]
     [HttpPost]
-    public async Task<IActionResult> Register(RegisterViewModel model, IFormFile uploadedFile)
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> NewUser(RegisterViewModel model, IFormFile uploadedFile)
     {
         if (ModelState.IsValid)
         {
@@ -85,7 +88,6 @@ public class AccountController : Controller
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, "user");
-                await _signInManager.SignInAsync(user, false);
                 return RedirectToAction("Profile", "User", new {userId = user.Id});
             }
             foreach (var error in result.Errors)
@@ -94,14 +96,4 @@ public class AccountController : Controller
         ModelState.AddModelError("", "Что-то пошло не так, проверьте все данные!");
         return View(model);
     }
-
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    [HttpPost]
-    public async Task<IActionResult> LogOut()
-    {
-        await _signInManager.SignOutAsync();
-        return RedirectToAction("Login");
-    }
-
 }
