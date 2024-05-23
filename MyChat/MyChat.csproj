@@ -22,6 +22,9 @@
       <Compile Update="Models\LoginViewModel.cs">
         <DependentUpon>User.cs</DependentUpon>
       </Compile>
+      <Compile Update="Models\EditViewModel.cs">
+        <DependentUpon>User.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>

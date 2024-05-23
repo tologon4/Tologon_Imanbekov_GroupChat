@@ -33,7 +33,7 @@ public class ValidationController : Controller
     }
     
     [AcceptVerbs("GET", "POST")]
-    public bool EditCheckEmail(string Email)
+    public bool EditCheckEmail(string? Email)
     {
         User usr = _context.Users.FirstOrDefault(u => u.Id == int.Parse(_userManager.GetUserId(User)));
         bool result = true;
@@ -47,7 +47,7 @@ public class ValidationController : Controller
         return result;
     }
     [AcceptVerbs("GET", "POST")]
-    public bool EditCheckUsername(string UserName)
+    public bool EditCheckUsername(string? UserName)
     {
         User usr = _context.Users.FirstOrDefault(u => u.Id == int.Parse(_userManager.GetUserId(User)));
         bool result = true;

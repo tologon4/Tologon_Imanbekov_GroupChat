@@ -72,12 +72,14 @@ public class AccountController : Controller
             {
                 await uploadedFile.CopyToAsync(fileStream);
             }
+            model.BirthDate = model.BirthDate.ToUniversalTime();
             User user = new User()
             {
                 Email = model.Email,
                 UserName = model.UserName,
                 BirthDate = model.BirthDate,
-                PhoneNumber = model.PhoneNumber
+                PhoneNumber = model.PhoneNumber,
+                Avatar = path
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
@@ -95,10 +97,11 @@ public class AccountController : Controller
 
     [Authorize]
     [ValidateAntiForgeryToken]
+    [HttpPost]
     public async Task<IActionResult> LogOut()
     {
         await _signInManager.SignOutAsync();
-        return RedirectToAction("Login", "Account");
+        return RedirectToAction("Login");
     }
 
 }

@@ -5,4 +5,27 @@
     Layout = "_Layout";
 }
 
-<h2>title</h2>
+<div class="row g-0 pt-5">
+    <div class="col-md-4 pb-5 text-center border-bottom">
+        <img src="@Model.Avatar" width="200" height="200" class="rounded-circle mx-auto ">
+    </div>
+    <div class="col-md-8 border-bottom">
+        <div class="card-body">
+            <div class="row ">
+                <div class=" col col-3"><h5>@Model.Email</h5></div>
+                @if (ViewBag.CurrentUser.Id == @Model.Id) { <div class="col col-9 d-flex"><a class="my-auto btn btn-light me-auto" asp-action="Edit" asp-controller="User" asp-route-userId="@Model.Id">Edit profile</a></div> }
+                <div class="col col-4 mt-4"> BirthDay: &nbsp; <b>@DateGet(@Model.BirthDate)</b> </div>
+                <div class="col col-12 mt-4">UserName: &nbsp;<h5>@Model.UserName</h5></div>
+                <div class="col col-12 mt-4">Phone number: &nbsp;<h5>@Model.PhoneNumber</h5></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions
+{
+    string DateGet(DateTime? date)
+    {
+        return $"{date?.ToString(" MMMM dd, yyyy")}";
+    }
+}
