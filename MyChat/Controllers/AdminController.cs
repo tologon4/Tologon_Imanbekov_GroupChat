@@ -39,6 +39,18 @@ public class AdminController : Controller
     [Authorize]
     [HttpPost]
     [Authorize(Roles = "admin")]
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (!id.HasValue)
+            return null;
+        Message? message = await _db.Messages.FirstOrDefaultAsync(m => m.Id == id);
+        _db.Messages.Remove(message);
+        _db.SaveChanges();
+        return Json(new {result = "Message was deleted, it will disappear in 1-5 seconds..."});
+    }
+    [Authorize]
+    [HttpPost]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Block(int? userId)
     {
         if (!userId.HasValue)
