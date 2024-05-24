@@ -1,0 +1,36 @@
+@model List<Message>
+
+              @foreach (var message in @Model)
+              {
+                if (message.UserId != @ViewBag.CurrentUser.Id)
+                {
+                  <div class="received-chats mt-3">
+                    <div class="received-chats-img">
+                      <a asp-action="Profile" asp-route-userId="@message.UserId"><img src="@message.User.Avatar" class="msgimg"/></a>
+                    </div>
+                    <div class="received-msg">
+                      <div class="received-msg-inbox">
+                        <a class="nav-link text-dark" asp-action="Profile" asp-route-userId="@message.UserId"><span >@message.User.UserName</span></a>
+                        <p> @message.Content</p>
+                        <span class="time">@message.CreatedTime</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+                else
+                {
+                  <div class="outgoing-chats">
+                    <div class="outgoing-chats-img">
+                      <a asp-action="Profile" asp-route-userId="@message.UserId"><img src="@message.User.Avatar" class="msgimg"/> </a>
+                    </div>
+                    <div class="outgoing-msg">
+                      <div class="outgoing-chats-msg">
+                        <a class="nav-link text-dark" asp-action="Profile" asp-route-userId="@message.UserId"><span>@message.User.UserName</span></a>
+                        <p class="multi-msg"> @message.Content</p>
+                        <span class="time">@message.CreatedTime</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              }
+

@@ -1,8 +1,97 @@
-@model List<User>
+@model List<Message>
 
 @{
     ViewBag.Title = "title";
     Layout = "_Layout";
 }
 
-<h2>title</h2>
+
+
+<div class="container-chat">
+      <div class="msg-header">
+        <div class="container1">
+          <img src="@ViewBag.CurrentUser.Avatar" class="msgimg" />
+          <div class="active">
+            <p>@ViewBag.CurrentUser.UserName</p>
+          </div>
+        </div>
+      </div>
+      <div class="chat-page">
+        <div class="msg-inbox">
+          <div class="chats">
+            <div id="messages-place" class="msg-page pt-5">
+            </div>
+          </div>
+          <div class="msg-bottom">
+            <div class="input-group-chat">
+              <input
+                type="text"
+                class="form-control-chat"
+                placeholder="Write message..."
+                id="message-content"
+                maxlength="150"
+              />
+              <span class="input-group-text send-icon" id="message-send">
+                <i class="bi bi-send" ></i>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+</div>
+
+
+@section Scripts
+{
+    <script>
+        function sendMessage(data){
+            $('#messages-place').append($('<div class="outgoing-chats">'+
+                           '<div class="outgoing-chats-img">' +
+                                 '<a asp-action="Profile" asp-route-userId="'+ @ViewBag.CurrentUser.Id +'"><img src="' + data.userAvatar +'" class="msgimg"/></a>'+
+                             '</div>'+
+                             '<div class="outgoing-msg">'+
+                                 '<div class="outgoing-chats-msg">'+
+                                     '<a class="nav-link text-dark" asp-action="Profile" asp-route-userId="'+@ViewBag.CurrentUser.Id+'"><span>' +data.userName +'</span></a>'+
+                                     '<p>' + data.content + '</p>'+
+                                     '<span class="time">' + data.createdTime + '</span>'+
+                                 '</div>'+
+                             '</div>'+
+                         '</div>'));
+        }
+        
+        $().ready(function (){
+            $.ajax({
+                            url: '@Url.Action("ChatResults", "User")',
+                            type: 'GET',
+                            success: function(data) {
+                                $('#messages-place').html(data);
+                            }
+                           });
+           
+            setInterval(function() {
+                $.ajax({
+                url: '@Url.Action("ChatResults", "User")',
+                type: 'GET',
+                success: function(data) {
+                    $('#messages-place').html(data);
+                }
+               });
+            }, 5000);
+            let currentUserId = '@ViewBag.CurrentUser.Id';
+              $('#message-send').click(function (e){
+              e.preventDefault();
+              $.ajax({
+                url: '@Url.Action("SendMessage", "User")',
+                type: 'POST',
+                data: { 'userId': currentUserId, 'content' : $('#message-content').val() },
+                success: function (data){
+                  console.log(data);  
+                  sendMessage(data);                       
+                }
+              });  
+                             
+            });
+        });
+    </script>
+}

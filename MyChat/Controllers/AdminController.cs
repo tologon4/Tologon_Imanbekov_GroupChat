@@ -42,10 +42,10 @@ public class AdminController : Controller
     public async Task<IActionResult> Block(int? userId)
     {
         if (!userId.HasValue)
-            return Json(new {blockIdent = "no such user"});
+            return null;
         User? user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null)
-            return Json(new { blockIdent = "no such user"});
+            return null;
         user.LockoutEnabled = !user.LockoutEnabled;
         if (user.LockoutEnabled == false)
             user.LockoutEnd = DateTimeOffset.MaxValue;

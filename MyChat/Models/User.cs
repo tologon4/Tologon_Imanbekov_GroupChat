@@ -6,4 +6,5 @@ public class User : IdentityUser<int>
 {
     public DateTime? BirthDate { get; set; }
     public string? Avatar { get; set; }
+    public int? MessagesCount  { get; set; }
 }

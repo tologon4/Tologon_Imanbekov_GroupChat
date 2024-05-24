@@ -28,7 +28,37 @@ public class UserController : Controller
     [Authorize]
     public async Task<IActionResult> Chat()
     {
+        ViewBag.CurrentUser = _db.Users.FirstOrDefault(u => u.Id == int.Parse(_userManager.GetUserId(User)));
         return View();
+    }
+
+    public async Task<IActionResult> ChatResults()
+    {
+        List<Message> messages = _db.Messages.Include(u => u.User).ToList();
+        ViewBag.CurrentUser = _db.Users.FirstOrDefault(u => u.Id == int.Parse(_userManager.GetUserId(User)));
+        return PartialView("_ChatPartial", messages.TakeLast(30).ToList());
+    }
+    public async Task<IActionResult> SendMessage(int? userId, string? content)
+    {
+        Message? message = new Message();
+        if (!userId.HasValue)
+            return null;
+        User? user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        message = new Message()
+        {
+            UserId = user.Id,
+            User = user,
+            Content = content,
+            CreatedTime = DateTime.UtcNow
+        };
+        if (user.MessagesCount == null)
+            user.MessagesCount = 1;
+        else
+            user.MessagesCount +=1;
+        _db.Users.Update(user);
+        _db.Messages.Add(message);
+        _db.SaveChanges();
+        return Json(new {content = message.Content, createdTime = message.CreatedTime, userAvatar = user.Avatar, userName = user.UserName});
     }
     
     [Authorize]

@@ -49,7 +49,7 @@ public class AccountController : Controller
                     return RedirectToAction("Profile", "User", new {userId = user.Id});
                 }
             }
-            ModelState.AddModelError("", "Неправильный логин или пароль!");
+            ModelState.AddModelError("", "Неправильный логин или пароль!\nИли вы заблокированы!");
         }
         ModelState.AddModelError("", "Неправильная заполненная форма!");
         return View(model);
